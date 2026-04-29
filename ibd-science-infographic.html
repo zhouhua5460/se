@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炎症性肠病（IBD）科普图</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #4a90e2;
+        }
+        
+        .title {
+            color: #1a365d;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            color: #4a90e2;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f4fc;
+            font-weight: 600;
+        }
+        
+        .disease-types {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .disease-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #e74c3c;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .disease-card:nth-child(2) {
+            border-left-color: #3498db;
+        }
+        
+        .disease-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1a365d;
+            margin-bottom: 8px;
+        }
+        
+        .disease-desc {
+            color: #444;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .barrier-issues {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .issue-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #2ecc71;
+        }
+        
+        .issue-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #2ecc71;
+        }
+        
+        .issue-text {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .cycle-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc, #e8f4fc);
+            padding: 30px;
+        }
+        
+        .cycle-title {
+            color: #e74c3c;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        #cycle-diagram {
+            height: 350px;
+            margin: 20px 0;
+        }
+        
+        .cycle-step {
+            display: inline-block;
+            background: white;
+            padding: 15px 25px;
+            margin: 0 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            color: #2c3e50;
+            position: relative;
+        }
+        
+        .cycle-step::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4a90e2;
+            font-size: 1.5rem;
+        }
+        
+        .cycle-step:last-child::after {
+            display: none;
+        }
+        
+        .quote {
+            font-style: italic;
+            color: #7f8c8d;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff8e1, #fff3cd);
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 5px solid #f39c12;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .cycle-description {
+            font-size: 1.1rem;
+            color: #444;
+            line-height: 1.6;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .cycle-step {
+                display: block;
+                margin: 10px 0;
+            }
+            
+            .cycle-step::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">炎症性肠病（IBD）科普图</h1>
+            <p class="subtitle">了解肠道屏障破坏与营养缺乏的恶性循环</p>
+        </div>
+        
+        <div class="content-grid">
+            <div class="section">
+                <h2 class="section-title">什么是IBD？</h2>
+                <p style="margin-bottom: 20px; font-size: 1.1rem; color: #444;">
+                    炎症性肠病（IBD）是一种慢性、复发性的消化系统疾病，主要特征为肠道炎症和免疫系统异常反应。
+                </p>
+                
+                <div class="disease-types">
+                    <div class="disease-card">
+                        <div class="disease-name">克罗恩病（Crohn's Disease, CD）</div>
+                        <div class="disease-desc">
+                            可影响从口腔到肛门的整个消化道，炎症呈节段性分布，可累及肠壁全层。
+                        </div>
+                    </div>
+                    
+                    <div class="disease-card">
+                        <div class="disease-name">溃疡性结肠炎（Ulcerative Colitis, UC）</div>
+                        <div class="disease-desc">
+                            主要累及结肠和直肠，炎症局限于黏膜层，呈连续性分布。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">肠道屏障受损</h2>
+                <p style="margin-bottom: 20px; font-size: 1.1rem; color: #444;">
+                    IBD的一个核心问题是肠道屏障功能的破坏，表现为：
+                </p>
+                
+                <div class="barrier-issues">
+                    <div class="issue-item">
+                        <div class="issue-icon">🔬</div>
+                        <div class="issue-text">肠上皮细胞死亡增加</div>
+                    </div>
+                    
+                    <div class="issue-item">
+                        <div class="issue-icon">🔗</div>
+                        <div class="issue-text">紧密连接破坏</div>
+                    </div>
+                    
+                    <div class="issue-item">
+                        <div class="issue-icon">🚪</div>
+                        <div class="issue-text">肠道通透性增加</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section cycle-section">
+                <h2 class="cycle-title">营养不良的恶性循环</h2>
+                
+                <div class="quote">
+                    "The interplay between intestinal barrier degradation and trace element insufficiency worsens inflammatory bowel disease."
+                    <br><br>
+                    "肠道屏障退化与微量元素不足的相互作用加剧了炎症性肠病"
+                </div>
+                
+                <div id="cycle-diagram"></div>
+                
+                <div class="cycle-description">
+                    <strong>恶性循环过程：</strong><br>
+                    <div style="margin: 10px 0; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                            <div style="text-align: center; margin: 5px 10px;">
+                                <div style="display: inline-block; width: 30px; height: 30px; background: #e74c3c; border-radius: 50%; color: white; line-height: 30px; font-weight: bold;">1</div>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">IBD发病</div>
+                            </div>
+                            <div style="text-align: center; margin: 5px 10px;">
+                                <div style="display: inline-block; width: 30px; height: 30px; background: #3498db; border-radius: 50%; color: white; line-height: 30px; font-weight: bold;">2</div>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">肠道吸收不良</div>
+                            </div>
+                            <div style="text-align: center; margin: 5px 10px;">
+                                <div style="display: inline-block; width: 30px; height: 30px; background: #f39c12; border-radius: 50%; color: white; line-height: 30px; font-weight: bold;">3</div>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">营养缺乏</div>
+                            </div>
+                            <div style="text-align: center; margin: 5px 10px;">
+                                <div style="display: inline-block; width: 30px; height: 30px; background: #2ecc71; border-radius: 50%; color: white; line-height: 30px; font-weight: bold;">4</div>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">肠道屏障受损</div>
+                            </div>
+                            <div style="text-align: center; margin: 5px 10px;">
+                                <div style="display: inline-block; width: 30px; height: 30px; background: #9b59b6; border-radius: 50%; color: white; line-height: 30px; font-weight: bold;">5</div>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">IBD加重</div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px; font-size: 1rem;">
+                            <strong>1 → 2 → 3 → 4 → 5 → (1)</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        <span style="display: inline-block; margin-right: 20px;">
+                            <span style="border-bottom: 2px solid #4a90e2; padding-right: 10px;">实线箭头</span>：疾病发展过程
+                        </span>
+                        <span style="display: inline-block;">
+                            <span style="border-bottom: 2px dashed #4a90e2; padding-right: 10px;">虚线箭头</span>：恶性循环闭合
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 炎症性肠病科普图 | 数据来源：科学研究论文摘要</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #95a5a6;">
+                注：此图表为科普教育用途，实际医疗决策请咨询专业医生
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 创建恶性循环图表 - 沿着圆弧排列
+        const cycleData = [
+            { id: 1, name: "IBD发病", color: "#e74c3c", description: "炎症性肠病开始" },
+            { id: 2, name: "肠道吸收不良", color: "#3498db", description: "营养吸收功能受损" },
+            { id: 3, name: "营养缺乏", color: "#f39c12", description: "微量元素不足" },
+            { id: 4, name: "肠道屏障受损", color: "#2ecc71", description: "屏障功能破坏" },
+            { id: 5, name: "IBD加重", color: "#9b59b6", description: "病情恶化" }
+        ];
+
+        const width = 800;
+        const height = 350; // 增加高度，为更大的圆圈和文字提供空间
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = 130; // 进一步增大半径，为更大的圆圈和文字提供空间
+
+        const svg = d3.select("#cycle-diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${centerX}, ${centerY})`);
+
+        // 绘制圆弧路径 - 调整角度避免节点重叠
+        const startAngle = -Math.PI / 1.8; // 调整起始角度
+        const endAngle = Math.PI * 1.2; // 进一步减少结束角度，避免重叠
+        const arcLength = endAngle - startAngle;
+
+        // 移除虚线圆弧背景，避免与虚线箭头混淆
+        // 只保留节点之间的连接线
+
+        // 在圆弧上计算节点位置（5个节点）
+        const arrowPoints = [];
+        for (let i = 0; i < 5; i++) {
+            // 在圆弧上均匀分布5个点，留出一些间距
+            const angle = startAngle + (i / 4) * arcLength * 0.9; // 使用0.9的系数留出间距
+            arrowPoints.push({ angle });
+        }
+
+        // 绘制连接线和箭头
+        arrowPoints.forEach((point, i) => {
+            if (i < arrowPoints.length - 1) {
+                // 计算连接线起点和终点（在圆圈边缘）
+                const circleRadius = 45; // 圆圈半径
+                const x1 = Math.cos(point.angle) * (radius - circleRadius);
+                const y1 = Math.sin(point.angle) * (radius - circleRadius);
+                const x2 = Math.cos(arrowPoints[i + 1].angle) * (radius - circleRadius);
+                const y2 = Math.sin(arrowPoints[i + 1].angle) * (radius - circleRadius);
+                
+                // 判断连接类型
+                const isConnection4to5 = (i === 3); // 4到5的连接
+                const isConnection5to1 = (i === 4); // 5到1的连接（需要单独处理）
+                
+                // 绘制连接线
+                const line = svg.append("line")
+                    .attr("x1", x1)
+                    .attr("y1", y1)
+                    .attr("x2", x2)
+                    .attr("y2", y2)
+                    .attr("stroke", "#4a90e2")
+                    .attr("stroke-width", 2);
+                
+                // 4到5用实线，5到1用虚线
+                if (isConnection4to5) {
+                    // 4到5保持实线
+                } else if (isConnection5to1) {
+                    // 5到1用虚线
+                    line.attr("stroke-dasharray", "5,3");
+                } else {
+                    // 其他连接（1-2, 2-3, 3-4）保持原样
+                }
+                
+                // 在连接线末端添加箭头
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const arrowSize = 8;
+                
+                svg.append("polygon")
+                    .attr("points", `0,0 ${-arrowSize},${-arrowSize/2} ${-arrowSize},${arrowSize/2}`)
+                    .attr("fill", "#4a90e2")
+                    .attr("transform", `translate(${x2}, ${y2}) rotate(${angle * 180 / Math.PI})`);
+            }
+        });
+        
+        // 单独绘制5到1的连接（圆弧的另一端）
+        const circleRadius = 45; // 圆圈半径
+        const x1_5 = Math.cos(arrowPoints[4].angle) * (radius - circleRadius);
+        const y1_5 = Math.sin(arrowPoints[4].angle) * (radius - circleRadius);
+        const x2_1 = Math.cos(arrowPoints[0].angle) * (radius - circleRadius);
+        const y2_1 = Math.sin(arrowPoints[0].angle) * (radius - circleRadius);
+        
+        // 绘制5到1的虚线连接
+        svg.append("line")
+            .attr("x1", x1_5)
+            .attr("y1", y1_5)
+            .attr("x2", x2_1)
+            .attr("y2", y2_1)
+            .attr("stroke", "#4a90e2")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,3");
+        
+        // 添加5到1的箭头
+        const angle5to1 = Math.atan2(y2_1 - y1_5, x2_1 - x1_5);
+        svg.append("polygon")
+            .attr("points", `0,0 ${-8},${-4} ${-8},${4}`)
+            .attr("fill", "#4a90e2")
+            .attr("transform", `translate(${x2_1}, ${y2_1}) rotate(${angle5to1 * 180 / Math.PI})`);
+
+        // 创建节点 - 沿着圆弧排列，使用与箭头相同的角度
+        const nodes = svg.selectAll(".cycle-node")
+            .data(cycleData)
+            .enter()
+            .append("g")
+            .attr("class", "cycle-node")
+            .attr("transform", (d, i) => {
+                // 使用与箭头相同的角度计算
+                const angle = arrowPoints[i].angle;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                return `translate(${x}, ${y})`;
+            });
+
+        // 添加节点背景（圆形）- 进一步增大圆圈
+        nodes.append("circle")
+            .attr("r", 45)  // 进一步增大圆圈
+            .attr("fill", d => d.color)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 4);
+
+        // 删除围绕圆圈的文字，保持简洁一致
+
+        // 添加节点编号（在圆圈内部，白色）- 进一步增大
+        nodes.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.3em")
+            .attr("fill", "white")  // 白色，在彩色圆圈内更清晰
+            .attr("font-weight", "bold")
+            .attr("font-size", "20px")  // 进一步增大编号字体
+            .text(d => d.id);
+
+        // 响应式调整
+        function resize() {
+            const containerWidth = document.getElementById('cycle-diagram').clientWidth;
+            const scale = Math.min(1, containerWidth / width);
+            
+            d3.select("#cycle-diagram svg")
+                .attr("width", containerWidth)
+                .attr("height", height * scale);
+                
+            d3.select("#cycle-diagram svg g")
+                .attr("transform", `translate(${containerWidth/2}, ${centerY * scale}) scale(${scale})`);
+        }
+        
+        // 初始调整
+        resize();
+        
+        // 窗口大小改变时调整
+        window.addEventListener('resize', resize);
+    </script>
+</body>
+</html>
